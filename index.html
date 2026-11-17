@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leave Management System</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f0f4fa;color:#172033}
+header{background:#2055a5;color:white;text-align:center;padding:24px 12px}
+header h1{margin:0 0 7px;font-size:24px}
+header p{margin:0}
+main{max-width:1100px;margin:50px auto;padding:0 18px}
+.panel{background:white;border-radius:14px;padding:28px;box-shadow:0 5px 20px #17203312}
+.narrow{max-width:440px;margin:0 auto}
+h2{color:#2055a5;margin:0 0 22px}
+h3{color:#2055a5;margin:0 0 12px}
+input,select,textarea{width:100%;padding:13px;margin:7px 0 17px;border:1px solid #c9d5e7;border-radius:7px;font-size:15px}
+textarea{min-height:100px;resize:vertical}
+label{font-weight:bold}
+button{background:#2055a5;color:white;border:0;border-radius:7px;padding:12px 20px;cursor:pointer;font-size:14px;margin:4px}
+button:hover{background:#174481}
+.secondary{background:#64748b}.danger{background:#dc3545}.success{background:#198754}
+.link{color:#0756c5;text-decoration:underline;cursor:pointer}
+.center{text-align:center}
+.home-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin:24px 0}
+.tile{background:#e9f0ff;padding:24px;border-radius:10px;text-align:center}
+.tile p{margin:8px 0 16px}
+.leave-card{border:1px solid #ccd8e9;border-radius:9px;padding:18px;margin:14px 0}
+.leave-card p{margin:8px 0;overflow-wrap:anywhere}
+.status{font-weight:bold}
+.pending{color:#b7791f}.approved{color:#198754}.rejected{color:#dc3545}
+.stats{font-size:24px;font-weight:bold;margin:10px}
+.hidden{display:none!important}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.small{font-size:13px;color:#64748b}
+.actions{margin-top:12px}
+@media(max-width:600px){main{margin:24px auto}.panel{padding:20px}header h1{font-size:21px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Leave Management System</h1>
+  <p>Student &amp; Staff Portal</p>
+</header>
+<main>
+  <section id="home" class="panel narrow center">
+    <h2>Welcome!</h2>
+    <p>Manage your leave applications easily.</p>
+    <div class="home-actions">
+      <button onclick="show('register')">Student Register</button>
+      <button onclick="show('studentLogin')">Student Login</button>
+      <button onclick="show('staffLogin')">Staff Login</button>
+    </div>
+  </section>
+
+  <section id="register" class="panel narrow hidden">
+    <h2 class="center">Student Registration</h2>
+    <form id="registerForm">
+      <label>Student Name</label><input id="regName" required placeholder="Enter your name">
+      <label>Roll Number</label><input id="regRoll" required placeholder="Enter roll number">
+      <label>Email</label><input id="regEmail" type="email" required placeholder="Enter email">
+      <label>Password</label><input id="regPassword" type="password" minlength="4" required placeholder="Create password">
+      <button type="submit">Register</button>
+    </form>
+    <p class="center">Already registered? <span class="link" onclick="show('studentLogin')">Login</span></p>
+    <button class="secondary" onclick="show('home')">Back</button>
+  </section>
+
+  <section id="studentLogin" class="panel narrow hidden">
+    <h2 class="center">Student Login</h2>
+    <form id="studentLoginForm">
+      <label>Email</label><input id="loginEmail" type="email" required placeholder="Enter email">
+      <label>Password</label><input id="loginPassword" type="password" required placeholder="Enter password">
+      <button type="submit">Login</button>
+    </form>
+    <p class="center">New Student? <span class="link" onclick="show('register')">Register</span></p>
+    <button class="secondary" onclick="show('home')">Back</button>
+  </section>
+
+  <section id="staffLogin" class="panel narrow hidden">
+    <h2 class="center">Staff Login</h2>
+    <form id="staffLoginForm">
+      <label>Email</label><input id="staffEmail" type="email" required placeholder="staff@gmail.com">
+      <label>Password</label><input id="staffPassword" type="password" required placeholder="Enter password">
+      <button type="submit">Staff Login</button>
+    </form>
+    <p class="small">Demo staff login: staff@gmail.com / staff123</p>
+    <button class="secondary" onclick="show('home')">Back</button>
+  </section>
+
+  <section id="studentDashboard" class="panel hidden">
+    <div class="topline"><div><h2>Student Dashboard</h2><h3 id="welcomeName"></h3></div><button class="danger" onclick="logout()">Logout</button></div>
+    <div class="grid">
+      <div class="tile"><h3>Apply Leave</h3><p>Submit your leave application.</p><button onclick="show('applyLeave')">Apply Now</button></div>
+      <div class="tile"><h3>My Applications</h3><p>Check your leave status.</p><button onclick="renderMyLeaves();show('myLeaves')">View Leaves</button></div>
+    </div>
+  </section>
+
+  <section id="applyLeave" class="panel narrow hidden">
+    <h2 class="center">Apply for Leave</h2>
+    <form id="leaveForm">
+      <label>Leave Type</label>
+      <select id="leaveType" required><option>Casual Leave</option><option>Medical Leave</option><option>On Duty</option><option>Other</option></select>
+      <label>From Date</label><input id="fromDate" type="date" required>
+      <label>To Date</label><input id="toDate" type="date" required>
+      <label>Reason</label><textarea id="reason" required placeholder="Enter reason for leave"></textarea>
+      <button type="submit">Submit Application</button>
+    </form>
+    <button class="secondary" onclick="show('studentDashboard')">Back</button>
+  </section>
+
+  <section id="myLeaves" class="panel hidden">
+    <h2>My Leave Applications</h2>
+    <div id="myLeaveList"></div>
+    <button class="secondary" onclick="show('studentDashboard')">Back</button>
+  </section>
+
+  <section id="staffDashboard" class="panel hidden">
+    <div class="topline"><h2>Staff Dashboard</h2><button class="danger" onclick="logout()">Logout</button></div>
+    <p>Manage Student Leave Requests</p>
+    <div class="grid">
+      <div class="tile"><h3>Pending</h3><div class="stats" id="pendingCount">0</div><button onclick="filterStaff('Pending')">View Pending</button></div>
+      <div class="tile"><h3>Approved</h3><div class="stats" id="approvedCount">0</div><button onclick="filterStaff('Approved')">View Approved</button></div>
+      <div class="tile"><h3>Rejected</h3><div class="stats" id="rejectedCount">0</div><button onclick="filterStaff('Rejected')">View Rejected</button></div>
+    </div>
+    <button onclick="filterStaff('All')">View All Applications</button>
+    <h3 id="staffListTitle">All Applications</h3>
+    <div id="staffLeaveList"></div>
+  </section>
+</main>
+<script>
+const getUsers=()=>JSON.parse(localStorage.getItem('lms_users')||'[]');
+const getLeaves=()=>JSON.parse(localStorage.getItem('lms_leaves')||'[]');
+const saveUsers=x=>localStorage.setItem('lms_users',JSON.stringify(x));
+const saveLeaves=x=>localStorage.setItem('lms_leaves',JSON.stringify(x));
+let currentUser=null;
+
+function show(id){
+  document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+function logout(){currentUser=null;show('home')}
+
+document.getElementById('registerForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const name=regName.value.trim(),roll=regRoll.value.trim(),email=regEmail.value.trim().toLowerCase(),password=regPassword.value;
+  const users=getUsers();
+  if(users.some(u=>u.email===email||u.roll.toLowerCase()===roll.toLowerCase()))return alert('Email or Roll Number already registered.');
+  users.push({name,roll,email,password});
+  saveUsers(users);e.target.reset();alert('Registration successful! Please login.');show('studentLogin');
+});
+
+document.getElementById('studentLoginForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const email=loginEmail.value.trim().toLowerCase(),password=loginPassword.value;
+  const user=getUsers().find(u=>u.email===email&&u.password===password);
+  if(!user)return alert('Invalid email or password.');
+  currentUser=user;welcomeName.textContent='Welcome, '+user.name; e.target.reset();show('studentDashboard');
+});
+
+document.getElementById('staffLoginForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  if(staffEmail.value.trim().toLowerCase()==='staff@gmail.com'&&staffPassword.value==='staff123'){
+    e.target.reset();renderStaff();show('staffDashboard');
+  }else alert('Invalid staff login details.');
+});
+
+document.getElementById('leaveForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  if(!currentUser)return;
+  const from=fromDate.value,to=toDate.value;
+  if(to<from)return alert('To Date must be on or after From Date.');
+  const leaves=getLeaves();
+  leaves.push({id:Date.now(),name:currentUser.name,roll:currentUser.roll,email:currentUser.email,type:leaveType.value,from,to,reason:reason.value.trim(),status:'Pending',remark:'No remarks'});
+  saveLeaves(leaves);e.target.reset();alert('Leave application submitted successfully!');renderMyLeaves();show('myLeaves');
+});
+
+function formatDate(d){if(!d)return '';return new Date(d+'T00:00:00').toLocaleDateString('en-GB')}
+function cardHTML(l,staff=false){
+  const cls=l.status.toLowerCase();
+  return `<article class="leave-card">
+    <h3>${escapeHTML(l.type)}</h3>
+    ${staff?`<p><b>${escapeHTML(l.name)}</b></p><p>Roll Number: ${escapeHTML(l.roll)}</p><p>Email: ${escapeHTML(l.email)}</p>`:''}
+    <p>From: ${formatDate(l.from)}</p><p>To: ${formatDate(l.to)}</p>
+    <p>Reason: ${escapeHTML(l.reason)}</p>
+    <p class="status">Status: <span class="${cls}">${l.status}</span></p>
+    <p>Staff Remark: ${escapeHTML(l.remark||'No remarks')}</p>
+    ${staff&&l.status==='Pending'?`<div class="actions"><label>Staff Remark</label><input id="remark-${l.id}" placeholder="Enter remarks"><button class="success" onclick="updateStatus(${l.id},'Approved')">Approve</button><button class="danger" onclick="updateStatus(${l.id},'Rejected')">Reject</button></div>`:''}
+  </article>`;
+}
+function escapeHTML(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderMyLeaves(){
+  const list=getLeaves().filter(l=>l.email===currentUser.email);
+  myLeaveList.innerHTML=list.length?list.map(l=>cardHTML(l)).join(''):'<p>No leave applications found.</p>';
+}
+function renderStaff(){
+  const all=getLeaves();
+  pendingCount.textContent=all.filter(l=>l.status==='Pending').length;
+  approvedCount.textContent=all.filter(l=>l.status==='Approved').length;
+  rejectedCount.textContent=all.filter(l=>l.status==='Rejected').length;
+  filterStaff('All');
+}
+function filterStaff(status){
+  const all=getLeaves(),items=status==='All'?all:all.filter(l=>l.status===status);
+  staffListTitle.textContent=(status==='All'?'All':status)+' Applications';
+  staffLeaveList.innerHTML=items.length?items.map(l=>cardHTML(l,true)).join(''):'<p>No applications found.</p>';
+}
+function updateStatus(id,status){
+  const leaves=getLeaves(),item=leaves.find(l=>l.id===id);
+  if(!item)return;
+  const field=document.getElementById('remark-'+id);
+  item.status=status;item.remark=field&&field.value.trim()?field.value.trim():'No remarks';
+  saveLeaves(leaves);renderStaff();alert('Application '+status.toLowerCase()+'.');
+}
+show('home');
+</script>
+</body>
+</html>
